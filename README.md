@@ -10,8 +10,3 @@
 - [ ] Conclusion (`conclusion.tex`)
 - [ ] Bibliography (`bibliography.tex`)
 
-## Final Touches
-- [ ] Compile successfully with `pdflatex`
-- [ ] Proofread all text for typos and alignment
-- [ ] Verify page count (30–50 pages)
-- [ ] Submit final PDF version
