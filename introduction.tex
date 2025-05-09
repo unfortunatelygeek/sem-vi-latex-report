@@ -1,54 +1,33 @@
 \chapter{Introduction}
-This work is concerned with the issues of emulating different loads using power electronic converters. The scope of the problem as follows:
+The proposed system is a smart, telemedicine solution to aid in the development of Healthcare infrastructure in rural areas. The problem is defined below:
 \begin{itemize}
-\item To implement models of machine type loads.
-\item Study issues of modelling machine type loads under faulted condition.
-\item Study issues of modelling solid-state loads (thyristor converter).
+\item Developing a smart imaging solution for medical diagnostics, specifically targeting otoscopy (ear examination), pharyngoscopy (throat examination), and dermatoscopy (skin examination). 
+\item Integrate a camera with an STM microcontroller to capture high-resolution images
+\item Perform image analysis for diagnostic assistance
+\item Develop a user-friendly mobile or desktop app for medical professionals.
 \end{itemize}
-In developing motion control systems it is common
-practice to employ simulators to experiment with proposed designs and their effect on the performance of the system. These simulators are typically implemented
-on a digital computer using a high-level language program to solve a system of differential equations in a time-stepping fashion. \par
-Due to the lack of 
-accurate mathematical models of many physical systems, experiments cannot be completely
-eliminated in real-time. In an effort to fill in the gap between digital simulations in a computer and final
-experiments on the product, Hardware In- the Loop (HIL) has become a widely adopted technique.
-HIL typically refers to a system where some of the hardware or mechanical devices are replaced by
-controllers interfacing in real-time with sensors and actuators ~\cite{peter}. With a HIL system, one can finish most of the design and test iterations in a highly efficient highly flexible environment, as long as the HIL is an adequately realistic representation of the actual plant. The fidelity of the HIL system depends on
-how well it emulates the dynamics of the replaced components or subsystems. This is the motivation
-of dynamic load emulation. However in this research work a different  approach is proposed for real-time load emulation using HIL system. The system  uses the real controller running in its own processor, but rather than a real load  connected to the converter, the controller acts on a simulation of load model  and draws required currents of the actual system from the source.\par 
- For example, manufacturers of inverters will normally test prototype and preproduction equipment with a standard induction motor. This, motor may not always have the desired characteristics for a particular test, or may  not be well matched to the intended application. The
-same arguments apply for generation applications which utilize power electronic conversion equipment. It is also the case that, in some testing situations, the manufacturer may wish to include characteristics of the mechanical load or prime mover. For instance, when
-testing an electric vehicle drive inverter, it would be useful to load the inverter with something which represents the characteristics of the vehicle during particular driving conditions. Similarly, a machine tool manufacturer may wish to test electric drive inverters with loads which characterize the dynamics, duty cycles and work piece variations of the machine tool. With these arrangements, long-term thermal tests can be carried out under realistic conditions. A similar benefit could be obtained in a generation application, for instance, in a variable speed wind generation system. Here, the generator is producing power in accordance with a randomly varying wind source. This subjects the power converter to randomly varying conditions, which are difficult to replicate in a test laboratory.\par
-\begin{figure}[ht]
-\centering
-\scalebox{0.5}{\includegraphics{vmb.pdf}}
-\caption{Load Emulation block diagram.}
-\label{vmb}
-\end{figure}
-This report presents a new idea to overcome the above testing difficulties in the form of a `virtual load'. The load emulation is composed of a bidirectional power converter, real-time digital system and a closed loop control system. The real time system is described below  produce a programmable load/source, which can be connected directly to the power electronic inverter as a replacement for an electrical load. There may be some confusion between the inverter and the converters which form the virtual load, as shown in Fig. \ref{vmb} `inverter' will be taken to mean the inverter being tested and `converter' will be used to describe the power electronics in the virtual load. The virtual load is effectively a power level active impedance. It is important to realize that the virtual load is
-capable of bidirectional power flow and also transient and steady-state operation. These features allow it to emulate the characteristics of a wide range of electrical machines and their associated mechanical loads. The complexity of the emulation is limited only by the
-capability of the bidirectional power converter and the real-time simulation which controls it.\par
-Bidirectional power converters are now commonplace. The special feature of the converter used for the emulation role is that it must act at least as fast as the inverter being tested. A priori the assumption might be that the converter needs to be very fast, and that this
-might threaten the viability of the idea. In practice, the converter is used in conjunction with energy storage (i.e. inductors), which effectively slow changes down and reduce the bandwidth required.\par
+Rural India faces systemic healthcare barriers, including, but not limited to, limited diagnostic infrastructure, a shortage of trained specialists, and high out-of-pocket expenditures. With nearly 70\% of the population residing in rural regions, the availability of ENT specialists and dermatologists remains disproportionately low. approximately 1 per 116,000 and 1 per 127,000 individuals, respectively. Rural patients often experience delayed diagnosis and treatment for common but potentially serious ear, throat, and skin conditions.\par
+To address these challenges, the integration of portable imaging devices, AI-driven diagnostic algorithms, and telemedicine platforms has emerged as a scalable solution. Recent advances in embedded systems, such as STM32-based devices running real-time operating systems like Zephyr OS, enable high-resolution image capture and wireless transmission. When combined with AI-based inference systems, these devices can assist non-specialist health workers in early identification of abnormalities from otoscopic, pharyngoscopic, and dermatoscopic scans.\par
+This paper presents the design and implementation of a smart imaging system for rural diagnostics, incorporating embedded hardware, wireless data transfer, on-device preprocessing, and a React Native–based mobile application for real-time visualization and diagnostic assistance. The system aims to reduce diagnostic delays, improve specialist reach via telemedicine, and enhance primary care capabilities in resource-constrained settings. \par
 \section{Motivation}
-This work was motivated by the need to emulate the loads which allows the user to test both the hardware and the software of the inverter. The virtual load can provide different load characteristics with which the control algorithms and inverter design can be
-tested. The flexibility of the load emulation allows the designer of the control algorithms to experiment with different designs safe in the knowledge that if something goes wrong expensive damage to the inverter and machine will not result. A rotating machine cannot be stopped instantly: it has inertia. The load emulation contains no rotating parts, it is made up of fast acting power electronics which can handle a fault situation and prevent unnecessary damage.\par
-The load emulation system has regeneration capability, as the power flow from the inverter can be returned to the mains supply. When testing an inverter with an actual machine, the machine uses this power for rotation and it is therefore lost. As well as being a small energy benefit this also reduces the laboratory power supply requirements.
+India faces a severe shortage of healthcare specialists, particularly in ENT and dermatology. As of March 2023, over 23,000 sanctioned medical posts remained vacant across the country, with more than 9,000 vacancies in primary health centers (PHCs) alone
+According to the National Health Profile 2019, India has only about 1 doctor per 1,457 people, far below the WHO recommendation of 1:1,000
+This shortage is even more acute in rural areas, where approximately 70\% of India's population resides
+There are only about 12,000 ENT specialists in India for a population of 1.4 billion (~1:116,000 ratio)
+There are approximately 11,000 dermatologists for the same population. 
+An additional problem, on top of these shortages, is that over 60\% of India's specialists practice in urban areas, serving only 30\% of the country's population. \par
+Closing this gap requires the use of technology-enabled innovations that allow experts to extend their services remotely, which can provide improved access to quality diagnostics and treatment across under-served areas.
+
 \section{Objectives}
 \begin{itemize}
-\item To study various Real-time simulation methods.
-\item To study various current control methods.
-\item Detailed simulation of current controllers such as:
-1. Synchronous reference PI regulator.
-2. Hysteresis current controller.
-3. Dead-beat current controller. 
-\item To investigate the issues involved in the use of power electronic converter to emulate electrical loads.
-\item Design and implementation of experimental setup for virtual load emulation.
-\item Analysis, simulation and laboratory implementation of `virtual Machine' in steady state as well in transient condition.
-\item Study issues of modelling machine loads under faulted condition.
-\item Study issues of modelling solid-state loads (thyristor converter).
-\item To study and simulation of interface impedance for various load models.
-\item To study and simulation of bidirectional power flow for AC to AC converter.
+\item Develop a smart imaging device for otoscopy, pharyngoscopy, and dermatoscopy.
+\item Integrate a high-resolution camera with an STM32 microcontroller.
+\item Use Zephyr OS for device firmware and Wi-Fi-based image transmission.
+\item Implement image preprocessing (e.g., denoising, normalization).
+\item Perform AI-based image analysis for diagnostic inference.
+\item Build a cross-platform React Native app for image visualization and reporting.
+\item Enable secure image transfer from device to app over Wi-Fi.
+\item Implement patient data management and report generation in the app.
 \end{itemize}
 \section{Layout of the Report} A brief chapter by chapter overview is presented here.\\
 Chapter 2: A literature review of different real-time simulation methods for load emulation is presented.  \\
