@@ -14,9 +14,44 @@ The growth of AI across all fields influenced by software cannot be denied. It i
 
 In our solution, we target 3 scans: dermatoscopy, pharyngoscopy and otoscopy.
 
+\section{Dermatoscopy}
+
+\subsection{Skin Tones in Humans}
+
+Human skin color is the result of how light interacts with the skin surface and deeper tissues. It is impacted by multiple chromophores or molecules that absorb light at specific wavelengths and thus effectively reflect/emit color. The main chromophores impacting human skin color include oxyhaemoglobin (red), deoxygenated hemoglobin (dark red/brown), carotenoids (a yellow-orange exogenous pigment), bilirubin (yellow), biliverdin (green) and melanin (brown). The epidermis contains melanin but little hemoglobin while the dermis contains little melanin but significant vascularity (e.g. hemoglobin). Human skin pigments include two forms of melanin (eumelanin, and pheomelanin), which are produced and contained in the epidermal or outer layer of the skin. Pheomelanin is associated with light red or yellow colors, while eumelanin is associated with dark brown or black colors. The amount of melanin in the skin impacts color (i.e. more melanin appears darker).~\cite{oxio} \par
+
+Objective Methods of classifying skin tone are many. One of them is CIELAB color space – defined by Commission Internationale de l’Eclairage (CIE) is a three-dimensional color space with three axes defined further below. The L* and b* have been correlated with pigment and the a* correlated to erythema levels. The purpose of CIELAB is to be more uniform than RGB space. The rough idea is that distance in LAB space between colors provides a quantification of how perceptibly different the colors are. The distance in RGB space is thought to not be so linear, so for example, if the distance doubles the colors may not actually become twice as easy to tell apart. \cite{book}
+
+Dimensions in CIELAB Colour Space:
+
+\begin{itemize}
+    \item L* = lightness 0 (black) to 100 (white)
+    \item a* = red/green on the chroma plane
+    \item b* = yellow/blue on the chroma plane
+\end{itemize}
+
+Individual Typology Angle (ITA) is used to determine the baseline level of skin pigmentation present in images of skin. This is a standardized measurement used in dermatology and skin research. It's a numerical value calculated from the colors in a skin image, specifically using the L* (lightness) and b* (yellowness-blueness) values from the CIE Lab color space. Proposed in 1991 by Chardon et. al.~\cite{chardon}, ITA is given by the formula: \par
+
+\begin{equation}
+    \text{ITA} = \left[\arctan\left(\frac{L^* - 50}{b^*}\right)\right] \times \frac{180}{\pi}
+\end{equation}
+
+It was found in 2020 by Kinyanjui et. al.~\cite{kinnie} that the majority of the images in the two chosen datasets, the ISIC 2018 Challenge dataset~\cite{isic2018} and the SD-198 dataset~\cite{sun}, considered to be benchmark datasets in the AI for skin disease community, ITA values ranged between $34.8^\circ$ and $48^\circ$. \par
+
+In 2021, Groh et. al. proved that CNNs perform best at classifying skin conditions for skin types that are similar to those they were trained on. ~\cite{groh}
+
 \section{Pharyngoscopy}
 
 Pharyngoscopy is a medical examination technique used to visualize the pharynx (throat) and adjacent structures. Clinically, this is most commonly performed by a physician shining a bright light into the patient`s mouth, sometimes using a small mirror or a fiberoptic scope to inspect the throat.~\cite{onto} This procedure is non-invasive and typically performed in an outpatient setting. \par
 
+The viability of telemedicine for laryngological diagnosis was proven in a seminal study that evaluated concordance rates between pre-laryngoscopy telemedicine encounters and follow-up in-person assessments with laryngoscopy.~\cite{choi} Research has shown high reliability and accuracy in diagnosing various otolaryngological conditions, including otologic conditions, rhinosinusitis, peritonsillar abscess, and nasal fractures through telemedicine platforms. While direct laryngoscopy remains the gold standard for definitive diagnosis, telemedicine consultations have proven effective for initial assessment and empiric management until in-person laryngoscopy can be performed. \par
 
-\
+The structure and dimensions of the pharynx are not uniform across all individuals, and emerging evidence indicates that these anatomical characteristics can indeed vary based on race and ethnicity. A significant study by Kollara et al. (2014) investigated the craniometric and velopharyngeal anatomy of young children aged 4 to 8 years from Black and White racial groups.~\cite{kollara} However, The difference is not as stark as it was in dermatoscopic scans, which is why we have left racial agnostism for furture scope in this solution.
+
+A significant technical advancement in pharyngoscopy was seen in Nakojo et. al. (2023). It involves AI-based anatomical classification of endoscopic images. Researchers developed a neural network trained on 5,382 endoscopic images to classify pharyngeal and laryngeal regions into 15 distinct anatomical locations. This system achieved 93.3\% overall accuracy with weighted averages of 0.934 for precision, 0.933 for recall, and 0.933 for F1-score when evaluated on an independent dataset of 1,110 images. The technical implementation employed gradient-weighted class activation mapping (Grad-CAM) \cite{selva} and Guided Grad-CAM, both by Selvaraju et. al., to visualize the specific image regions informing the algorithm's classifications. This approach provides transparency into the AI's decision-making process and helps identify potential blind spots during examinations, thereby improving diagnostic thoroughness~\cite{nakajo} \par
+
+\section{Otoscopy}
+
+A meta-analysis and systematic review of AI models for otoscopic image classification showed considerable diagnostic performance across different algorithmic strategies. Technical methods compared were convolutional neural networks (CNNs), artificial neural networks, support vector machines, decision trees, and k-nearest neighbors algorithms. The models were trained to differentiate among several diagnostic classes, namely normal tympanic membrane, acute otitis media, otitis media with effusion, chronic otitis media with/without perforation, cholesteatoma, and ear canal obstruction.~\cite{habibi}
+
+Performance analysis demonstrated that AI algorithms achieved 90.7\% (95\% CI: 90.1-91.3\%) accuracy in binary classification (normal vs. abnormal) across 14 studies. More sophisticated multiclass algorithms achieved 97.6\% (95\% CI: 97.3-97.9\%) accuracy in differentiating between normal, acute otitis media, and otitis media with effusion. Notably, when directly compared with human diagnosticians, AI systems demonstrated superior performance, achieving 93.4\% (95\% CI: 90.5-96.4\%) accuracy versus 73.2\% (95\% CI: 67.9-78.5\%) for human assessors. Among the various technical approaches, CNNs consistently achieved the highest diagnostic accuracy. \cite{habibi}
