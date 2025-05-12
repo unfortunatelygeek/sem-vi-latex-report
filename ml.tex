@@ -1,0 +1,66 @@
+\chapter{Machine Learning}
+
+\section{Pharyngoscopy: Vision Transformer for Pharyngitis Classification}
+
+Recent advancements in deep learning for medical imaging have introduced Vision Transformers (ViTs) as powerful alternatives to Convolutional Neural Networks (CNNs). In this section, we aggregate the key technical insights and equations that justify our choice of a \texttt{vit\_base\_patch16\_224} model for binary pharyngitis classification (healthy = “no”, inflamed = “phar”), culminating in a final validation accuracy of 93.9\%.
+
+\subsection{ViT Architecture and Patch Embedding}
+Given an input image \(\mathbf{X}\in\mathbb{R}^{H\times W\times C}\), ViT splits it into
+\[
+  N \;=\;\frac{H}{P}\times\frac{W}{P},
+  \quad P=16
+\]
+non–overlapping patches \(P_i\in\mathbb{R}^{P\times P\times C}\). Each patch is flattened and projected:
+\[
+  \begin{aligned}
+    \mathbf{e}_i &= \mathrm{Flatten}(P_i)\,\mathbf{W}_e + \mathbf{b}_e, 
+      &\mathbf{e}_i &\in \mathbb{R}^D,\\
+    \mathbf{W}_e &\in \mathbb{R}^{(P^2\,C)\times D}, 
+      &\mathbf{b}_e &\in \mathbb{R}^D,
+  \end{aligned}
+\]
+where \(D=768\) is the hidden dimension.
+
+\subsection{Positional Encoding and Class Token}
+We prepend a learnable classification token and add absolute positional embeddings \(\mathbf{E}_{\mathrm{pos}}\in\mathbb{R}^{(N+1)\times D}\):
+\[
+  \mathbf{Z}_0
+  = 
+  \begin{bmatrix}
+    \mathbf{e}_{\mathrm{[CLS]}} \\[6pt]
+    \mathbf{e}_1 + \mathbf{E}_{\mathrm{pos},1} \\[3pt]
+    \vdots \\[3pt]
+    \mathbf{e}_N + \mathbf{E}_{\mathrm{pos},N}
+  \end{bmatrix}
+  \in \mathbb{R}^{(N+1)\times D}.
+\]
+
+\subsection{Transformer Encoder Layers}
+For \(l=1,\dots,12\) we apply LayerNorm, multi-head self-attention (MSA), and a feed-forward network (FFN) with residual connections:
+\[
+  \begin{aligned}
+    \mathbf{Z}'_{l} &= \mathrm{MSA}\bigl(\mathrm{LN}(\mathbf{Z}_{l-1})\bigr) + \mathbf{Z}_{l-1},\\
+    \mathbf{Z}_{l}  &= \mathrm{FFN}\bigl(\mathrm{LN}(\mathbf{Z}'_{l})\bigr)  + \mathbf{Z}'_{l}.
+  \end{aligned}
+\]
+The final \(\mathrm{[CLS]}\) embedding \(\mathbf{z}_{\mathrm{[CLS]}}^{(12)}\) is fed to
+\[
+  \hat{y}
+  = \mathrm{Softmax}\!\bigl(\mathbf{W}_{\mathrm{cls}}\,\mathbf{z}_{\mathrm{[CLS]}}^{(12)} + \mathbf{b}_{\mathrm{cls}}\bigr).
+\]
+
+\subsection{Training Setup and Optimization}
+We fine-tune with binary cross-entropy over a batch of size \(B\):
+\[
+  \mathcal{L}_{\mathrm{BCE}}
+  = -\frac{1}{B}\sum_{i=1}^B
+    \bigl[y_i\log\hat{y}_i + (1 - y_i)\log(1 - \hat{y}_i)\bigr].
+\]
+Optimization details:
+\begin{itemize}
+  \item \textbf{Optimizer:} AdamW with \(\eta=5\times10^{-5}\), weight decay \(\lambda=0.01\).  
+  \item \textbf{Scheduler:} Cosine decay with 2‐step linear warmup over \(T\) total steps.  
+\end{itemize}
+
+\subsection{Results and Performance}
+The \texttt{vit\_base\_patch16\_224} model achieves \(\mathbf{93.9\%}\) validation accuracy on binary pharyngitis classification, with strong generalization across held-out folds. Attention‐map visualizations confirm that the model focuses on inflamed regions, supporting its clinical interpretability.
