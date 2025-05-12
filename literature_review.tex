@@ -64,15 +64,15 @@ However, as revealed by the 2025 analysis by two papers, Pakzad et al.~\cite{pak
   \item \textbf{Erroneous inclusions:} The dataset contains non-dermatological images (e.g., benign marks, artifacts, or unrelated anatomical regions), which introduce noise and distract from true pathology. (see \figurename~\ref{fig:fitz_erroneous}).
     \begin{figure}[h!]
       \centering
-      \includegraphics[width=0.9\textwidth]{images/fitz_erroneous.png}
+      \includegraphics[width=1\textwidth]{images/fitz_erroneous.png}
       \caption{Example of erroneously included non-dermatological images.}
       \label{fig:fitz_erroneous}
     \end{figure}
   \item \textbf{Non-standard partitioning and imaging conditions:} The dataset lacks a rigorously defined held-out test set and consistent imaging environments. There are significant variations in disease presentation, field of view, illumination, and the presence of artifacts such as clothing, non-uniform backgrounds, and watermarks. These inconsistencies hinder reproducibility and model generalization (see \figurename~\ref{fig:non_standard_splits}).
     \begin{figure}[h!]
       \centering
-      \includegraphics[width=0.9\textwidth]{images/fitz_partitioning.png}
-      \caption{Illustration of flawed data partitioning without lesion-level separation.}
+      \includegraphics[width=1\textwidth]{images/fitz_partitioning.png}
+      \caption{Illustration of flawed data partitioning.}
       \label{fig:non_standard_splits}
     \end{figure}
 \end{itemize}
@@ -101,15 +101,48 @@ Such leakage artificially boosts reported accuracy, masking true generalization 
 
 Several studies have shown that the convolutional neural networks when trained for dermatological classification perform considerably less accurately on darker Fitzpatrick phototypes (Types IV–VI) as compared to their lighter counterparts (Types I–III).~\cite{abhi} indicate that, after controlling for training set size, models trained on lighter skin images performed better than those trained on darker skin by as much as 15\% in overall diagnostic accuracy, a difference explained by two key factors: (1) higher heterogeneity of lesion morphology within darker phototypes, and (2) lower contrast between lesion and surrounding skin areas, which degrades feature extraction in conventional color‐based representations~\cite{abhi}. This shortfall is especially significant for Indian populations, in which darker skin is the prevalent skin complexion, as it can worsen delays in misdiagnosis and result in lower clinical outcomes.
 
+\subsubsection{Dataset Corrections and New Benchmarks}
+To address these biases, Abhishek et al.~\cite{abhi} introduced three rigorously curated datasets:
+\begin{itemize}
+    \item \textbf{DermaMNIST-C}: By grouping images by unique lesion ID and enforcing non-overlapping partitions, DermaMNIST-C eliminates the extensive train–test leakage (e.g., > 800 duplicated lesion images across splits) present in its predecessor.
+    \item \textbf{DermaMNIST-E}: Extends DermaMNIST-C with additional, high-quality images drawn from the ISIC 2018 Challenge for both validation and test sets, thereby enhancing diversity in both phototype and pathology.
+    \item \textbf{Fitzpatrick17k-C}: Builds on the original 17k image corpus by removing duplicated and mislabeled cases, standardizing imaging conditions, and adopting lesion-level split protocols to ensure true held-out evaluation. The authors demonstrate that models trained on these cleaned datasets exhibit a 10–12\% lift in balanced accuracy on darker skin types, narrowing—but not fully closing—the performance gap.
+\end{itemize}
+
+For our work, we plan on using \textbf{Fitzpatrick17k-C} for further development. 
+
 \section{Pharyngoscopy}
 
 Pharyngoscopy is a medical examination technique used to visualize the pharynx (throat) and adjacent structures. Clinically, this is most commonly performed by a physician shining a bright light into the patient`s mouth, sometimes using a small mirror or a fiberoptic scope to inspect the throat.~\cite{onto} This procedure is non-invasive and typically performed in an outpatient setting. \par
 
 The viability of telemedicine for laryngological diagnosis was proven in a seminal study that evaluated concordance rates between pre-laryngoscopy telemedicine encounters and follow-up in-person assessments with laryngoscopy.~\cite{choi} Research has shown high reliability and accuracy in diagnosing various otolaryngological conditions, including otologic conditions, rhinosinusitis, peritonsillar abscess, and nasal fractures through telemedicine platforms. While direct laryngoscopy remains the gold standard for definitive diagnosis, telemedicine consultations have proven effective for initial assessment and empiric management until in-person laryngoscopy can be performed. \par
 
-The structure and dimensions of the pharynx are not uniform across all individuals, and emerging evidence indicates that these anatomical characteristics can indeed vary based on race and ethnicity. A significant study by Kollara et al. (2014) investigated the craniometric and velopharyngeal anatomy of young children aged 4 to 8 years from Black and White racial groups.~\cite{kollara} However, The difference is not as stark as it was in dermatoscopic scans, which is why we have left racial agnostism for furture scope in this solution.
+The structure and dimensions of the pharynx are not uniform across all individuals, and emerging evidence indicates that these anatomical characteristics can indeed vary based on race and ethnicity. A significant study by Kollara et al. (2014) investigated the craniometric and velopharyngeal anatomy of young children aged 4 to 8 years from Black and White racial groups.~\cite{kollara} However, the difference is not as stark as it was in dermatoscopic scans, which is why we have left racial agnostism for furture scope in this solution.
+
+\subsection{Dataset}
+
+The Pharyngitis Dataset (v4) on Roboflow Universe comprises 559 annotated images evenly distributed across two classes: \emph{phar} and \emph{nophar}~\cite{robo}.
+
+All images are auto-oriented and statically cropped to the central 25–75\% region, focusing on pharyngeal anatomy; they are then resized to 640 x 640 pixels for input consistency. Data augmentation via horizontal and vertical flips, 90° rotations, and random crops (0–20\% zoom) doubles the training set, reflecting common strategies in medical imaging to improve generalization. \par
+
+The dataset adopts an 82\%–12\%–\% split (460/66/33 images) for training, validation, and testing, respectively \cite{robo}. While the validation proportion aligns with best practices for medium-sized datasets \cite{encord2024}, the small test set (N = 33) may reduce statistical power and inflate variance in final metrics \cite{wilb}. Although stratified sampling is generally recommended to preserve class balance \cite{encord2024}, explicit mention of its implementation here is absent.
+
+Targeted cropping minimizes background noise and isolates relevant anatomical features \cite{encord2024}. Augmentation strategies simulate clinical variability in imaging angles and scales, critical for robust performance across heterogeneous real-world settings \cite{wilb}. The binary class balance facilitates initial model convergence without severe imbalance, a common practice in early-stage classification benchmarks \cite{radimagenet2021}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{images/roboflow_samples.png}
+    \caption{Sample of a few images from the Roboflow Pharyngitis Dataset (v4).}
+    \label{fig:roboflow_samples}
+\end{figure}
+
+Absence of metadata regarding acquisition modalities (e.g., endoscopic vs. smartphone imaging) hinders assessment of domain shift and generalization \cite{wilb}. Labeling protocols—including inter-rater reliability measures—are unspecified, raising concerns about annotation consistency \cite{encord2024}. Finally, the overall sample size (N = 559) remains modest compared to large-scale medical imaging collections, emphasizing the need for expanded, multi-center datasets \cite{robo}.
+
+\subsection{Existing Solutions}
 
 A significant technical advancement in pharyngoscopy was seen in Nakojo et. al. (2023). It involves AI-based anatomical classification of endoscopic images. Researchers developed a neural network trained on 5,382 endoscopic images to classify pharyngeal and laryngeal regions into 15 distinct anatomical locations. This system achieved 93.3\% overall accuracy with weighted averages of 0.934 for precision, 0.933 for recall, and 0.933 for F1-score when evaluated on an independent dataset of 1,110 images. The technical implementation employed gradient-weighted class activation mapping (Grad-CAM) \cite{selva} and Guided Grad-CAM, both by Selvaraju et. al., to visualize the specific image regions informing the algorithm's classifications. This approach provides transparency into the AI's decision-making process and helps identify potential blind spots during examinations, thereby improving diagnostic thoroughness~\cite{nakajo} \par
+
+In our work, we explore the possibility of ViTs (Vision Transformers) in this line of disease detection as a novel approach to pharyngitis detection.
 
 \section{Otoscopy}
 
