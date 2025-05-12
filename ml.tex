@@ -2,7 +2,58 @@
 
 \section{Pharyngoscopy: Vision Transformer for Pharyngitis Classification}
 
-Recent advancements in deep learning for medical imaging have introduced Vision Transformers (ViTs) as powerful alternatives to Convolutional Neural Networks (CNNs). In this section, we aggregate the key technical insights and equations that justify our choice of a \texttt{vit\_base\_patch16\_224} model for binary pharyngitis classification (healthy = “no”, inflamed = “phar”), culminating in a final validation accuracy of 93.9\%.
+Recent advancements in deep learning for medical imaging have introduced Vision Transformers (ViTs)~\cite{vit} as powerful alternatives to Convolutional Neural Networks (CNNs). In this section, we aggregate the key technical insights and equations that justify our choice of a \texttt{vit\_base\_patch16\_224} model (A ViT Base Model trained on the ImageNet Corpus) for binary pharyngitis classification (healthy = “no”, inflamed = “phar”), culminating in a final validation accuracy of 93.9\%.~\cite{patch}\cite{imagenet}
+
+\subsection{Data Augmentation}
+Data augmentation artificially expands the dataset by applying label‐preserving transformations, acting as an implicit regularizer to mitigate overfitting \cite{buslaev2018albumentations}. Both handcrafted and automated strategies have demonstrated substantial gains in classification accuracy and robustness \cite{cubuk2020randaugment}. \par
+
+Let $x$ denote an input image. We apply a composition of stochastic transformations:
+\[
+\tilde{x} = \mathcal{N}\bigl(\text{Flip}\bigl(\text{RandAugment}\bigl(\text{ColorJitter}\bigl(\text{Resize}(x)\bigr)\bigr)\bigr)\bigr),
+\]
+where each operator is detailed below.
+
+\subsubsection{Resizing}
+All images are resized to a fixed size $224\times224$ to ensure consistent input dimensions for the ViT, which simplifies batch processing and accelerates training convergence \cite{wikipediaDataAugmentation}.  
+
+\subsubsection{Color Corrections}
+\paragraph{Hue/Saturation/Value Shift}
+We apply random shifts in hue, saturation, and value to simulate variations in illumination and skin tone across different imaging devices. Such color‐space augmentations enlarge the color manifold seen during training, improving resilience to lighting changes \cite{shorten2019survey}.  
+
+\paragraph{RGB Shift}
+Independent channel shifts further diversify color distributions, mimicking sensor noise and white‐balance differences across cameras \cite{buslaev2018albumentations}.
+
+\subsubsection{RandAugment}
+We adopt RandAugment\,\cite{cubuk2020randaugment}, which applies $N$ random operations each of magnitude $M$, with uniform probability. By collapsing the $(K\times P)$ search over individual probabilities and magnitudes into two hyperparameters $(N,M)$, RandAugment achieves state‐of‐the‐art performance without an expensive proxy search phase \cite{cubuk2020randaugment}.  
+
+\subsubsection{Random Horizontal Flip}
+Horizontal flipping with probability $0.5$ exploits the bilateral symmetry of many skin lesions, effectively doubling the dataset and reducing positional bias \cite{wikipediaDataAugmentation}.  Specifically, if $x(u,v)$ denotes the pixel at coordinates $(u,v)$, the flipped image $x'(u,v)=x(W-1-u,v)$ preserves labels under horizontal reflection \cite{simard2003best}.  
+
+\subsubsection{Normalization}
+Finally, each image is normalized per channel:
+\begin{equation}
+\hat{x}_{c} = \frac{x_{c} - \mu_{c}}{\sigma_{c}}, 
+\end{equation}
+where $(\mu,\sigma)$ are the ImageNet‐derived mean and standard deviation vectors. This standardization reduces internal covariate shift and accelerates training \cite{wikipediaBatchNorm}.  \par
+
+We implement a custom \texttt{PharyngitisDataset} that:
+\begin{itemize}
+  \item Expects a root directory with one subfolder per class (\texttt{no}, \texttt{phar}).
+  \item Builds an index of all \texttt{*.png}, \texttt{*.jpg}, \texttt{*.jpeg} samples.
+  \item Applies torchvision transforms (\texttt{train\_transform}, \texttt{val\_test\_transform}) on-the-fly.
+  \item Handles loading errors by returning a zero-tensor of shape $(3\times \text{IMG\_SIZE}\times \text{IMG\_SIZE})$ as a fallback.
+\end{itemize}
+
+We then wrap each split in a \texttt{DataLoader} with batch size 32, shuffling for training only.
+
+To mitigate class imbalance (\(\{268,192\}\) samples), we compute per-class weights
+\[
+  w_i \;=\; \frac{1/\mathrm{count}_i}{\sum_j (1/\mathrm{count}_j)} \times C,
+\]
+and pass these to \texttt{CrossEntropyLoss} with label smoothing \(\epsilon=0.05\).
+
+Additionally, we apply a combined MixUp/CutMix augmentation via:\newline
+\texttt{Mixup(mixup\_alpha=0.2,cutmix\_alpha=1.0,prob=0.8,switch\_prob=0.5,label\_smoothing=0.05)}.
 
 \subsection{ViT Architecture and Patch Embedding}
 Given an input image \(\mathbf{X}\in\mathbb{R}^{H\times W\times C}\), ViT splits it into
@@ -49,6 +100,14 @@ The final \(\mathrm{[CLS]}\) embedding \(\mathbf{z}_{\mathrm{[CLS]}}^{(12)}\) is
   = \mathrm{Softmax}\!\bigl(\mathbf{W}_{\mathrm{cls}}\,\mathbf{z}_{\mathrm{[CLS]}}^{(12)} + \mathbf{b}_{\mathrm{cls}}\bigr).
 \]
 
+\subsection{Finetuning}
+We fine-tune a pre‐trained Vision Transformer (ViT–Base–Patch16–224):
+\begin{itemize}
+  \item Input: $224\times224$ RGB images.
+  \item Frozen parameters: the first 100 parameter tensors to reduce overfitting.
+  \item Modified head: Dropout(0.2) \(\to\) Linear$(D,\,2)$ for our binary classification.
+\end{itemize}
+
 \subsection{Training Setup and Optimization}
 We fine-tune with binary cross-entropy over a batch of size \(B\):
 \[
@@ -61,6 +120,8 @@ Optimization details:
   \item \textbf{Optimizer:} AdamW with \(\eta=5\times10^{-5}\), weight decay \(\lambda=0.01\).  
   \item \textbf{Scheduler:} Cosine decay with 2‐step linear warmup over \(T\) total steps.  
 \end{itemize}
+
+\paragraph{Reproducibility.} We fix \(\texttt{torch.manual\_seed}(42)\) prior to training.
 
 \subsection{Results and Performance}
 The \texttt{vit\_base\_patch16\_224} model achieves \(\mathbf{93.9\%}\) validation accuracy on binary pharyngitis classification, with strong generalization across held-out folds. Attention‐map visualizations confirm that the model focuses on inflamed regions, supporting its clinical interpretability.
