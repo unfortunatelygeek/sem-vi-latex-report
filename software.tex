@@ -1,2 +1,173 @@
-\chapter{Algorithm and Process Flow Model}
- 
+\chapter{Technical Implementation of Application}
+
+\section{Overview of Application Architecture}
+
+The MedScope mobile application is built using a modern React Native framework with Expo, enabling cross-platform functionality across iOS and Android devices. The architecture follows a modular design pattern that separates concerns between the user interface components, hardware connectivity, data processing, and cloud service integration.
+
+\subsection{High-Level Architecture}
+
+The application's architecture consists of several key layers:
+
+Presentation Layer: User interface components built with React Native
+Device Communication Layer: Manages connections to external medical devices
+Data Processing Layer: Handles local storage and data transformation
+Cloud Service Integration Layer: Communicates with remote ML servers for analysis
+Figure \ref{fig:architecture} illustrates the overall architecture of the MedScope application.
+
+\begin{figure} \centering \caption{MedScope Application Architecture} \label{fig:architecture} \end{figure}
+
+\section{Core Functionality Modules}
+
+The application is structured around distinct functional modules, each addressing a specific medical diagnostic capability:
+
+\subsection{Imaging Module}
+
+The imaging module provides dermatological assessment capabilities through integration with an external camera connected to an STM32 microcontroller. This approach enhances the quality of dermatological imaging beyond what standard smartphone cameras can achieve.
+
+\subsubsection{External Camera Integration}
+
+The application establishes a TCP socket connection to the STM32 microcontroller that controls the specialized camera hardware. This connection allows:
+
+Control of camera settings (focus, exposure, polarization)
+Image capture triggering
+Image data transfer to the mobile device
+The connection flow is managed in the imaging module through a custom TCP client implementation that:
+
+Discovers the camera device on the local network
+Establishes a socket connection
+Sends control commands
+Receives high-quality image data
+\subsubsection{Guided Dermoscopic Capture}
+
+The imaging workflow implements a step-by-step guided capture process that ensures standardized dermatological imaging:
+
+Global view (15-30 cm away) to document the site with surrounding skin
+Regional view (5-10 cm away) to show context
+Close-up dermoscopic view (≤ 2 cm) with polarized/non-polarized light to reveal subsurface structures
+This structured approach ensures consistency in image capture for more accurate analysis results.
+
+\section{Cloud Integration and Machine Learning}
+
+\subsection{Image Analysis Service}
+
+For dermatological imaging, the application integrates with a cloud-hosted machine learning service specialized in skin lesion analysis.
+
+\subsubsection{Image Upload and Processing}
+
+When a complete set of dermoscopic images is captured, the application:
+
+Packages the images into a multi-part form request
+Uploads them to the cloud ML server using HTTPS
+Awaits analysis results
+Presents findings to the user with visual indicators
+The ML server processes the images and returns:
+
+Binary classification (healthy vs. unhealthy)
+Confidence percentage
+Detailed findings and recommendations when available
+\subsection{Audio Analysis Service}
+
+Similarly, for auscultation recordings, the application leverages a specialized ML service that can identify patterns in heart, lung, and abdominal sounds.
+
+The audio analysis workflow:
+
+Prepares the audio recording as a multi-part form request
+Uploads it to the analysis endpoint
+Receives and parses the JSON response
+Displays results with appropriate visual indicators
+The analysis returns structured data including:
+
+\section{User Interface Implementation}
+
+\subsection{Navigation Structure}
+
+The application uses Expo Router to implement a tab-based navigation structure with nested stack navigation for specific workflows:
+
+Home tab: Entry point and summary view
+Imaging tab: Access to dermatological imaging features
+Auscultation: Access to sound recording and analysis
+Profile: User information and settings
+\subsection{UI Component System}
+
+The interface is built using a consistent design language with several key component types:
+
+Screens: Full-page components that serve as the entry points for navigation
+Cards: Contained visual elements that group related information
+Action Components: Interactive elements like buttons and form controls
+Feedback Components: Status indicators, modals, and alerts
+The application employs a color-coded feedback system to communicate analysis results effectively:
+
+Green indicators for healthy/normal findings
+Red indicators for abnormal findings
+Blue for interactive elements and actions
+\section{Data Storage and Management}
+
+\subsection{Local Storage}
+
+The application implements a robust local storage system using Expo FileSystem for:
+
+Image storage with efficient naming conventions
+Associated metadata storage in JSON format
+Audio recording storage
+Analysis result caching
+Each captured image is stored with:
+
+\subsection{State Management}
+
+React's useState and useEffect hooks are used to manage application state throughout the component lifecycle. Key state elements include:
+
+Device connection status
+Capture/recording progress
+Analysis results
+UI interaction states
+\section{Technical Challenges and Solutions}
+
+\subsection{Hardware Integration Challenges}
+
+Integrating with the STM32 microcontroller-based camera presented several technical challenges:
+
+Connection Reliability: To ensure stable TCP socket connections, the application implements connection pooling and automatic reconnection strategies.
+
+Cross-Platform Compatibility: The TCP socket implementation required platform-specific optimizations to work consistently across iOS and Android.
+
+Image Transfer Performance: Large high-quality images required efficient buffering and transfer protocols to minimize latency.
+
+\subsection{Machine Learning Integration}
+
+Challenges in ML service integration included:
+
+Variable Network Conditions: The application implements robust error handling and retry logic to account for variable network conditions.
+
+Response Time Management: User feedback during processing helps manage expectations during ML analysis, which can take several seconds.
+
+Result Interpretation: Translating complex ML outputs into user-friendly information required careful UI design and content formatting.
+
+\section{Security Considerations}
+
+The application implements several security measures:
+
+Secure Connections: All cloud service communications use HTTPS with certificate validation.
+
+Local Data Protection: Images and recordings are stored in application-specific directories with appropriate access controls.
+
+User Privacy: Analysis is performed without requiring personally identifiable information to be transmitted.
+
+Bluetooth Security: Device connections use standard Bluetooth security protocols for pairing and data transfer.
+
+\section{Performance Optimization}
+
+Several techniques are employed to maintain application performance:
+
+Lazy Loading: Components and resources are loaded only when needed.
+
+Image Resizing: Images are resized before upload to reduce transfer time and server processing requirements.
+
+Efficient Rendering: React component optimization techniques prevent unnecessary re-renders.
+
+Background Processing: Heavy tasks are offloaded to background threads where possible.
+
+\section{Conclusion}
+
+The MedScope mobile application represents a sophisticated integration of mobile technology with specialized medical hardware and cloud-based machine learning. By leveraging an external STM32-controlled camera for imaging and cloud ML services for analysis, the application provides medical professionals with powerful diagnostic capabilities in a portable form factor.
+
+The modular architecture ensures extensibility for future medical devices and diagnostic capabilities, while the focus on user experience makes complex medical assessments accessible and intuitive.
