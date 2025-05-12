@@ -36,9 +36,70 @@ Individual Typology Angle (ITA) is used to determine the baseline level of skin 
     \text{ITA} = \left[\arctan\left(\frac{L^* - 50}{b^*}\right)\right] \times \frac{180}{\pi}
 \end{equation}
 
+Indian skin pigmentation comes under a broad spectrum from very fair to deep brown, underpinned by complex genetic admixture and regional adaptations.~\cite{nov} 
+Dermatological studies typically categorize Indian skin within Fitzpatrick Types III--VI, reflecting medium to very dark phototypes. 
+Objective colorimetric classification via ITA aligns these as Type III (ITA $\approx 28$--$41^\circ$), Type IV (ITA $\approx 10$--$28^\circ$), Type V (ITA $\approx -10$--$10^\circ$), and Type VI (ITA $< -10^\circ$)~\cite{nov} \par
+
+Regional analyses show that Type III predominates in North and Central India,  whereas Type IV is more common in Western and Southern populations.~\cite{sarangi} Darker shades (Types V–VI) are especially frequent in the far South, correlating with lower mean ITA values.~\cite{nov} This pronounced melanin variation challenges AI dermatology tools often trained on lighter (Types I–II) cohorts, risking reduced diagnostic accuracy across India’s varying skin tones.
+
+\subsection{Datasets}
+
+During our literature review, we found that skin colour agnostism was a severe problem across AI methodologies in the dermatoscopy space.
+
 It was found in 2020 by Kinyanjui et. al.~\cite{kinnie} that the majority of the images in the two chosen datasets, the ISIC 2018 Challenge dataset~\cite{isic2018} and the SD-198 dataset~\cite{sun}, considered to be benchmark datasets in the AI for skin disease community, ITA values ranged between $34.8^\circ$ and $48^\circ$. \par
 
-In 2021, Groh et. al. proved that CNNs perform best at classifying skin conditions for skin types that are similar to those they were trained on. ~\cite{groh}
+In 2021, Groh et. al. proved that CNNs perform best at classifying skin conditions for skin types that are similar to those they were trained on. ~\cite{groh}\par
+
+Bias in dermatological datasets is a serious issue. It remains a hindrance to dermatological advancement in the developing world over the developed world. The use of artificial intelligence in dermatology has made great strides in recent years, with some models getting close to the diagnostic ability of human specialists. But these developments have come disproportionately to the benefit of lighter skin, reinforcing healthcare inequalities for darker skin groups, such as most Indian patients.~\cite{alip} The problem originates mainly with dataset bias - representation and quality - that has resulted in AI systems performing much less accurately on darker skin than on lighter skin.~\cite{agg} The 2013 Global Burden of Disease study~\cite{mok} recognized skin diseases as the fourth most common cause of nonfatal disabilities worldwide, emphasizing the imperative need for precise diagnosis in all populations~\cite{isic2018}. In India, where the population is diverse and encompasses a broad range of skin colors, the imperative need for fair AI systems is especially urgent. But until recently, large dermatological image datasets have been plagued with underrepresentation of darker skin types and other data quality problems that undermined model performance.
+
+\subsubsection{Fitzpatrick17k}
+
+The Fitzpatrick17k dataset represented an important step forward when it was introduced, as it explicitly included Fitzpatrick skin type labels and aimed for broader diversity. It sourced and annotated 16,577 clinical images sourced from two dermatology atlases — DermaAmin and Atlas Dermatologico — with Fitzpatrick skin type labels with two data annotation services: Scale AI and Centaur Labs. The annotated images represent 114 skin conditions with at least 53 images and a maximum of 653 images per skin condition. \cite{fitz}
+
+However, as revealed by the 2025 analysis by two papers, Pakzad et al.~\cite{pakzad} and Abhishek et al.~\cite{abhi}, this dataset suffered from several critical quality issues that limited its utility.
+
+\begin{itemize}
+  \item \textbf{Data duplication:} Numerous near-identical images appear throughout the dataset, often arising from multiple captures of the same lesion under slightly different angles or lighting conditions.
+  \item \textbf{Mislabeled images:} A nontrivial subset of images are annotated with incorrect diagnostic categories and erroneous Fitzpatrick phototype assignments, compromising label fidelity.
+  \item \textbf{Erroneous inclusions:} The dataset contains non-dermatological images (e.g., benign marks, artifacts, or unrelated anatomical regions), which introduce noise and distract from true pathology. (see \figurename~\ref{fig:fitz_erroneous}).
+    \begin{figure}[h!]
+      \centering
+      \includegraphics[width=0.9\textwidth]{images/fitz_erroneous.png}
+      \caption{Example of erroneously included non-dermatological images.}
+      \label{fig:fitz_erroneous}
+    \end{figure}
+  \item \textbf{Non-standard partitioning and imaging conditions:} The dataset lacks a rigorously defined held-out test set and consistent imaging environments. There are significant variations in disease presentation, field of view, illumination, and the presence of artifacts such as clothing, non-uniform backgrounds, and watermarks. These inconsistencies hinder reproducibility and model generalization (see \figurename~\ref{fig:non_standard_splits}).
+    \begin{figure}[h!]
+      \centering
+      \includegraphics[width=0.9\textwidth]{images/fitz_partitioning.png}
+      \caption{Illustration of flawed data partitioning without lesion-level separation.}
+      \label{fig:non_standard_splits}
+    \end{figure}
+\end{itemize}
+
+All these points, in addition to its massive size (of 16,577 images) made Fitzpatrick17k a very difficult dataset to work with.
+
+\subsubsection{DermaMNIST}
+
+\begin{itemize}
+  \item \textbf{Data duplication:} A substantial fraction of the 10,015 images in DermaMNIST were near‐identical, originating from multiple captures of the same lesion under slightly varying orientations or magnifications \cite{pakzad}.
+  \item \textbf{Mislabeled images:} Numerous instances of incorrect diagnostic labels and Fitzpatrick phototype assignments were identified, undermining the reliability of supervised learning targets \cite{abhi}.
+  \item \textbf{Erroneous inclusions:} Several non‐dermatological images (e.g., artifacts, benign skin markings) were mistakenly incorporated, further introducing noise into the training distribution \cite{pakzad,abhi}.
+  \item \textbf{Non‐standard partitioning:} The original release lacked a rigorously defined held‐out test set, impeding fair benchmark comparisons and inflating performance estimates \cite{abhi}.
+\end{itemize}
+
+More alarmingly, detailed lesion‐level analyses uncovered extensive data leakage across splits:
+
+\begin{itemize}
+  \item 886 images (641 unique lesions) duplicated between training and test sets,
+  \item 440 images (332 lesions) between training and validation sets,
+  \item 128 images (113 lesions) between validation and test sets,
+  \item 51 images (40 lesions) appearing in all three partitions \cite{pakzad}.
+\end{itemize}
+
+Such leakage artificially boosts reported accuracy, masking true generalization performance and exacerbating diagnostic bias against darker phototypes (Fitzpatrick Types III–VI) prevalent in Indian cohorts.  \par
+
+Several studies have shown that the convolutional neural networks when trained for dermatological classification perform considerably less accurately on darker Fitzpatrick phototypes (Types IV–VI) as compared to their lighter counterparts (Types I–III).~\cite{abhi} indicate that, after controlling for training set size, models trained on lighter skin images performed better than those trained on darker skin by as much as 15\% in overall diagnostic accuracy, a difference explained by two key factors: (1) higher heterogeneity of lesion morphology within darker phototypes, and (2) lower contrast between lesion and surrounding skin areas, which degrades feature extraction in conventional color‐based representations~\cite{abhi}. This shortfall is especially significant for Indian populations, in which darker skin is the prevalent skin complexion, as it can worsen delays in misdiagnosis and result in lower clinical outcomes.
 
 \section{Pharyngoscopy}
 
