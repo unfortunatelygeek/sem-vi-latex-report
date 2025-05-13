@@ -1,26 +1,39 @@
-\chapter{Project road map}
+\chapter{Project Road Map}
+
 \section{Literature Review}
-This stage consists of in-depth review of the articles published in well known journals and conference proceedings.
-\section{Simulation Stage}
+This stage includes a detailed survey of state-of-the-art smart imaging solutions used for otoscopy, pharyngoscopy, and dermatoscopy. It involves reviewing articles from reputed medical imaging, embedded systems, and artificial intelligence journals and conferences. The goal is to understand current diagnostic methodologies, challenges in image acquisition in constrained clinical environments, and the use of deep learning for disease classification in resource-limited settings.
+
+\section{Hardware Integration and Testing Stage}
 \begin{itemize}
-\item To setup a software based Power Electronics Test Bench for the virtual load emulation through public-domain circuit simulator, SEQUEL. The test bench consists of a virtual load model, IGBT based inverter and a current controller.
-\item Different current control techniques for virtual load will be studied and tested on this software test bench. Their comparative merits and demerits and suitability for a real time emulation would be investigated through software simulation.
-\item To write a load model and control algorithm for real-time implementation on a DSP platform.
-\item Study the issues relating to the interfacing impedance.
-\item Study the issues and simulation of non-linear active loads.
-\item The results of current control techniques by computer simulation will presented in the second stage progress seminar.
+\item To integrate a high-resolution camera (chosen to be Arducam Mega 3MP Camera) with an STM32-based (B-L475E-IoT01A, chosen for its low-powered nature and multi-communication facilities) microcontroller for capturing otoscopic, pharyngeal, and dermatoscopic images.
+\item To develop a MicroPython-based embedded routine for data acquisition and secure transmission to a connected desktop or mobile interface.
+\item To validate the hardware-captured image quality against dataset standards and check compatibility with the pretrained model.
+\item To test real-time inference using model quantization and deployment via TensorFlow Lite or ONNX on edge devices (e.g., Raspberry Pi, Jetson Nano).
+\item To incorporate UV sensor and lighting conditions as contextual input for improving prediction robustness.
 \end{itemize}
-\section{Hardware setup and Testing Stage}
+
+\section{Simulation and Algorithm Design Stage}
 \begin{itemize}
-\item To simulate Virtual machine
-\item To prepare a hardware setup and verify experimental results with the simulation results. 
-\item To prepare hardware setup for bidirectional power flow.
+\item To simulate and evaluate baseline performance of image classification models (e.g., CNNs, ViTs, and DINOv2) on public datasets like ISIC, HAM10000, and other ear/throat imaging datasets.
+\item To perform pretraining or fine-tuning of a self-supervised ViT-based model (DINOv2) for binary and multiclass classification of dermatoscopic and otoscopic images.
+\item To write the image preprocessing pipeline including resizing, normalization, and augmentation compatible with embedded platforms.
+\item To assess feature extraction robustness using Grad-CAM or LIME-based methods.
+\item To evaluate performance using metrics such as accuracy, F1 score, and confusion matrix on both healthy vs non-healthy and multi-disease settings.
 \end{itemize}
-\section{The final stage}
+
+\section{App and User Interface Stage}
 \begin{itemize}
-\item To implement the modifications, corrections and suggestions obtained during previous presentations.
-\item Preparation of a pre-synopsis report and its presentation
-\item To prepare the final report and send it for review
-\item To do the necessary corrections from the review report.
-\item Final Presentation.
+\item To design and develop a cross-platform mobile/desktop application using React Native or Flutter for viewing live camera feed and visualizing predictions.
+\item To integrate model output with the interface and overlay disease probability along with visual explanations (e.g., Grad-CAM heatmaps).
+\item To implement data logging, patient tagging, and report generation (PDF format) in the app.
+\item To establish secure data handling workflows ensuring patient privacy and compliance with healthcare data guidelines.
+\end{itemize}
+
+\section{Final Stage}
+\begin{itemize}
+\item To implement feedback and improvements based on interim presentations and real-world testing feedback from healthcare professionals.
+\item Preparation of a pre-synopsis report highlighting system architecture, model performance, and clinical utility.
+\item Compilation of the final technical report and submission for external review.
+\item To incorporate suggested revisions from the reviewers.
+\item Final demonstration and presentation of the complete working system with documentation.
 \end{itemize}

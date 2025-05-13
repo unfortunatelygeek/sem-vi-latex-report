@@ -175,17 +175,17 @@ Thus, we conclude our development of the model for binary classification of the 
 
 \section{Dermatoscopy}
 
-\section{Data Processing and Augmentation}
+\subsection{Data Processing and Augmentation}
 
 In this section, we describe the preprocessing pipeline applied to dermatoscopic images to remove acquisition artifacts and prepare the data for training, followed by the set of geometric and photometric augmentations used to increase the diversity of the training set.
 
-\subsection{Image Loading and Color Conversion}
+\subsubsection{Image Loading and Color Conversion}
 Images are loaded either from file paths or raw bytes streams. After decoding (e.g., via OpenCV’s \texttt{imdecode} for byte inputs), all images are converted from BGR to RGB color space to align with common deep‐learning frameworks:
 \[
 \texttt{image} = \texttt{cv2.cvtColor}(\texttt{image}, \texttt{cv2.COLOR\_BGR2RGB}).
 \]
 
-\subsection{Artifact Removal}
+\subsubsection{Artifact Removal}
 Dermatoscopic images often contain two dominant artifacts: dark circular borders from the dermatoscope and hair strands obscuring the lesion. We address these in two substeps.
 
 \subsubsection{Dermatoscope Border Removal}
@@ -194,7 +194,7 @@ First, we convert the RGB image to grayscale and apply a binary threshold (\(\ta
 \subsubsection{Hair Removal via Morphological Black‐Hat and Inpainting}
 Hair strands are detected by applying a black‐hat morphological transform with a large structuring element (e.g., \(17\times17\) kernel) on the grayscale image, which highlights dark hair on bright skin \cite{Jaworek2013}. Thresholding the black‐hat result yields a binary hair mask. We then inpaint masked regions using Telea’s algorithm (\texttt{cv2.INPAINT\_TELEA}) to reconstruct the underlying texture \cite{Khan2024, SharpRazor2023}.
 
-\subsection{Image Resizing and Model Preparation}
+\subsubsection{Image Resizing and Model Preparation}
 The cleaned images are resized to the model’s required input resolution (e.g., \(518\times518\) pixels) using bilinear interpolation, and converted to PIL format for compatibility with HuggingFace processors.
 
 \subsection{Data Augmentation}
@@ -211,11 +211,11 @@ To improve generalization and mitigate overfitting, we apply a sequence of rando
 
 These augmentations collectively expand the effective dataset size and promote model robustness to common variations in dermatoscopic imaging.
 
-\section{Model Architecture and Training Pipeline}
+\subsection{Model Architecture and Training Pipeline}
 
 We propose an enhanced skin lesion classification model built upon the DINOv2 vision foundation model, incorporating a custom two-stage classifier head, selective layer freezing, a robust training regimen, and post-training dynamic quantization for deployment.
 
-\subsection{Base Model and Classifier Head}
+\subsubsection{Base Model and Classifier Head}
 The backbone of our model is the DINOv2 Vision Transformer (ViT), a self-supervised foundation model pretrained on diverse image data that produces patch-level embeddings via a projection layer of dimensionality \(D\) (e.g., \(D = 768\) for \texttt{facebook/dinov2-base}).  We extract the pooled \([\mathtt{CLS}]\) token representation, \(\mathbf{h}\in\mathbb{R}^D\), and pass it through an advanced classifier head consisting of:
 \[
 \underbrace{\mathrm{LayerNorm}(D)}_{\text{normalize features}} \;\to\;
@@ -230,23 +230,23 @@ Layer normalization stabilizes hidden activations across the batch, the GELU act
 
 To preserve pretrained features and accelerate convergence, we freeze the first 80\% of transformer encoder layers (i.e., disable gradient updates) and fine-tune only the remaining top layers along with the classifier head.
 
-\subsection{Fine-Tuning and Optimization}
+\subsubsection{Fine-Tuning and Optimization}
 We optimize our model using the AdamW optimizer with weight decay, minimizing the numerically stable binary cross-entropy with logits loss:
 \[
 \mathcal{L} = \mathrm{BCEWithLogitsLoss}(\mathrm{logits},\,y),
 \]
 which combines a sigmoid activation and cross-entropy in one step to improve numerical stability. A cosine-annealing warm restart scheduler (SGDR) modulates the learning rate with periodic restarts, helping the model escape shallow minima and improving overall convergence.
 
-\subsection{Data Loading and Imbalance Handling}
+\subsubsection{Data Loading and Imbalance Handling}
 To address class imbalance in skin lesion datasets, we construct a weighted random sampler assigning each sample a weight inversely proportional to its class frequency. The sampler draws training examples with replacement according to these weights, ensuring minority classes are sufficiently represented each epoch. Data are loaded into mini-batches via a PyTorch \texttt{DataLoader}, which supports custom samplers and efficient multi-process loading.
 
-\subsection{Training Loop and Interpretability}
+\subsubsection{Training Loop and Interpretability}
 During each training epoch, we log predictions every 20 batches by displaying input images alongside true labels and predicted probabilities. For the first image in each logging batch, we generate a Grad-CAM saliency map overlay using TorchCAM, highlighting regions most influential to the model’s decision. This provides valuable interpretability for clinical review and model debugging.
 
-\subsection{Validation and Metrics}
+\subsubsection{Validation and Metrics}
 At validation time, we aggregate model outputs across the entire hold-out set and compute key performance metrics: area under the ROC curve (AUC), F1 score, and recall, using threshold-agnostic evaluation for robust assessment.
 
-\subsection{Post-Training Quantization}
+\subsubsection{Post-Training Quantization}
 For deployment on resource‐constrained devices, we apply PyTorch’s dynamic quantization to the fine-tuned model. This replaces floating-point linear layers with int8 weight‐only quantized counterparts, reducing model size by up to 75\% and improving inference speed with minimal accuracy degradation . The quantized model is exported for downstream integration in mobile or edge environments.
 
 

@@ -35,15 +35,6 @@
  
 \begin{document}
 
-% Roman page numbering for front matter
-\pagenumbering{roman}
-
-% Table of Contents and Figures
-\tableofcontents
-\clearpage
-\listoffigures
-\clearpage
-
 % Switch to Arabic numbering from here
 \pagenumbering{arabic}
 
@@ -51,6 +42,13 @@
 % Input Files
  
 \input{be_title.tex}
+
+% Table of Contents and Figures
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+
 \input{be_certificate1.tex}
 \input{be_certificate2.tex}
 \input{abstract.tex}
@@ -60,7 +58,6 @@
 \input{hardware.tex}
 \input{software.tex}
 \input{ml.tex}
-\input{results.tex}
 \input{road_map.tex}
 \input{conclusion.tex}
 \input{bibliography.tex}
