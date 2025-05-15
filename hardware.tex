@@ -1,6 +1,6 @@
 \chapter{System Overview}
 
-The system consists of three core components: a camera module, a microcontroller-based processing unit, and a user-interfacing application connected via a network. The camera module used is the Arducam Mega 3MP, which interfaces with the STM32L475 IoT Discovery Kit (DISCO\_L475\_IOT1) over the SPI bus. The microcontroller board then communicates with a remote TCP server using its built-in Wi-Fi module. A mobile application acts as the user interface to the system. The overall hardware architecture is depicted in Fig.~\ref{overall}.
+The proposed system is built around three main components: a camera module, a microcontroller-based processing unit, and a mobile application that serves as the user interface. These components are interconnected via a network to ensure seamless data flow. At the heart of the imaging system is the Arducam Mega 3MP camera, which communicates with the STM32L475 IoT Discovery Kit (DISCO\_L475\_IOT1) over an SPI interface. This microcontroller board leverages its onboard Wi-Fi to establish a connection with a remote TCP server, allowing real-time data transmission. Meanwhile, the mobile application provides a user-friendly interface to interact with the system. A high-level overview of the system’s hardware configuration is illustrated in Fig.~\ref{overall}.
 
 \begin{figure}[h!]
   \centering
@@ -11,7 +11,7 @@ The system consists of three core components: a camera module, a microcontroller
 
 \section{Camera Selection}
 
-To obtain sufficiently accurate results from the AI model used for image analysis, a minimum image resolution of 1080p is required. This resolution ensures that key visual features are preserved and detectable, allowing the AI algorithms to perform accurate classification, detection, or segmentation tasks. Although the Arducam Mega 3MP does not strictly provide 1920$\times$1080 resolution (1080p), it offers a maximum resolution of approximately 2048$\times$1536, which exceeds the 1080p requirement. Therefore, it satisfies the minimum resolution threshold for AI processing while maintaining a compact form factor and low power requirements suitable for embedded systems.
+To ensure reliable image analysis using AI-based models, a resolution of at least 1080p is generally required. This level of detail is crucial for preserving fine visual features that AI algorithms rely on for tasks like classification, detection, or segmentation. While the Arducam Mega 3MP does not conform precisely to the 1920×1080 (1080p) specification, it supports a resolution of approximately 2048×1536, which comfortably exceeds the requirement. In addition to meeting resolution needs, the module offers a compact size and low power consumption, making it well-suited for embedded applications where space and energy efficiency are critical.
 
 \section{Microcontroller Platform}
 
@@ -19,7 +19,7 @@ The STM32L475 IoT Discovery Kit was chosen for its low-power ARM Cortex-M4 micro
 
 \section{RTOS Selection: Zephyr}
 
-The firmware for the STM32L475 is developed using the Zephyr RTOS. Zephyr is a scalable, real-time operating system designed specifically for resource-constrained embedded devices. It provides a rich set of features such as multithreading, device drivers, and networking stacks, which are essential for handling the simultaneous operations of camera control, SPI communication, and Wi-Fi networking. Its modular architecture allows developers to include only the necessary components, keeping the firmware lightweight and efficient. Additionally, Zephyr supports a wide range of boards and peripherals, easing development and maintenance.
+Firmware development for the STM32L475 is carried out using the Zephyr RTOS, an open-source, real-time operating system tailored for embedded devices with limited resources. Zephyr offers vital functionalities like multithreading, hardware abstraction, and built-in networking stacks. These features are essential for coordinating tasks such as camera control, SPI-based communication, and managing the Wi-Fi module. One of Zephyr’s key strengths is its modularity, allowing developers to include only the components required for their specific application, keeping the firmware lightweight and efficient. The wide board support and active community also make Zephyr a robust choice for embedded development.
 
 \section{Communication Protocol: TCP}
 
